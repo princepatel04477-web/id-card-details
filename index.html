@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Polyfill/setter for window.fetch to prevent extension crashes when intercepting fetch
+      (function() {
+        try {
+          var originalFetch = window.fetch ? window.fetch.bind(window) : undefined;
+          var currentFetch = originalFetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return currentFetch;
+            },
+            set: function(fn) {
+              currentFetch = fn;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (_) {}
+
+        // Isolate uncaught errors from external browser extensions
+        window.addEventListener('error', function(event) {
+          var file = event && event.filename ? event.filename : '';
+          if (file.indexOf('chrome-extension://') !== -1 || file.indexOf('moz-extension://') !== -1) {
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            if (event.preventDefault) event.preventDefault();
+            return true;
+          }
+        }, true);
+      })();
+    </script>
+    <title>I-Card Extractor</title>
+    <meta name="description" content="AI-powered extraction of student & parent details and photos from scanned I-Card performa forms, with review screen and editable DOCX/CSV export." />
+    <meta property="og:title" content="I-Card Extractor" />
+    <meta property="og:description" content="AI-powered extraction of student & parent details and photos from scanned I-Card performa forms, with review screen and editable DOCX/CSV export." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Open+Sans:wght@400;500;600;700;800&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-900 text-slate-100 min-h-screen font-sans antialiased selection:bg-indigo-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
